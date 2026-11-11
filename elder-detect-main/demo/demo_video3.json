@@ -1,0 +1,12 @@
+{
+  "video": "D:/my_datasets/Pre-VFall/Pre-VFall/Pre-VFall/confusion_delirium/CLFM1.mp4",
+  "T": 300,
+  "B_source": "model(run_03)",
+  "E": 0.5,
+  "B_mean": 0.04485633969306946,
+  "B_max": 0.3954344093799591,
+  "I_mean": 0.5772251486778259,
+  "alarm_off": 0,
+  "alarm_on": 0,
+  "out": "demo/Pre-VFall/CLFM1_realB.mp4"
+}

@@ -1,0 +1,31 @@
+{
+  "model_type": "stgcn",
+  "task": "regression",
+  "num_joints": 13,
+  "input_channel": 2,
+  "joint_set": "coco13",
+  "window_size": 60,
+  "layers": [
+    64,
+    64,
+    128,
+    128,
+    256
+  ],
+  "temp_kernel": 9,
+  "dropout": 0.3,
+  "risk_mode": "exponential",
+  "ramp_lo": 0.3,
+  "ramp_hi": 0.7,
+  "tau_u": 12,
+  "tau_abn": 20,
+  "loss": "class_weighted",
+  "beta": 3,
+  "midband_center": 0.45,
+  "midband_width": 0.18,
+  "midband_peak": 6.0,
+  "w_normal": 1.0,
+  "w_unstable": 2.0,
+  "w_fall": 2.0,
+  "landmark_smoothing": {}
+}

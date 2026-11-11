@@ -1,0 +1,63 @@
+{
+  "aggregate": {
+    "n_videos": 3,
+    "B_mean_avg": 0.46,
+    "E_homefast_avg": 0.0,
+    "risk_short_mean_avg": 0.46,
+    "risk_long_avg": 0.0,
+    "total_alarm_frames": 215
+  },
+  "per_video": [
+    {
+      "dataset": "Pre-VFall",
+      "stem": "confusion_nph_CGFM1",
+      "room": "home",
+      "T": 128,
+      "B_source": "model",
+      "B_mean": 0.4263559877872467,
+      "E_homefast": 0.0,
+      "gate_enabled": false,
+      "I_mean": null,
+      "P": 0.0,
+      "risk_short_mean": 0.4263559877872467,
+      "risk_short_max": 0.7065227627754211,
+      "risk_long": 0.0,
+      "alarm_frames": 63,
+      "triggers": []
+    },
+    {
+      "dataset": "Pre-VFall",
+      "stem": "confusion_nph_CGFM2",
+      "room": "home",
+      "T": 157,
+      "B_source": "model",
+      "B_mean": 0.4829232692718506,
+      "E_homefast": 0.0,
+      "gate_enabled": false,
+      "I_mean": null,
+      "P": 0.0,
+      "risk_short_mean": 0.4829232692718506,
+      "risk_short_max": 0.7674647569656372,
+      "risk_long": 0.0,
+      "alarm_frames": 72,
+      "triggers": []
+    },
+    {
+      "dataset": "Pre-VFall",
+      "stem": "confusion_nph_CGFM3",
+      "room": "home",
+      "T": 115,
+      "B_source": "model",
+      "B_mean": 0.47178104519844055,
+      "E_homefast": 0.0,
+      "gate_enabled": false,
+      "I_mean": null,
+      "P": 0.0,
+      "risk_short_mean": 0.47178104519844055,
+      "risk_short_max": 0.7199201583862305,
+      "risk_long": 0.0,
+      "alarm_frames": 80,
+      "triggers": []
+    }
+  ]
+}

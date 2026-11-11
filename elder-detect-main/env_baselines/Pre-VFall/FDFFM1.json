@@ -1,0 +1,74 @@
+{
+  "ground_top_y": 0.34,
+  "obstacles": [
+    {
+      "bbox": [
+        0.0,
+        0.5,
+        0.15,
+        0.47
+      ],
+      "type": "桌子"
+    },
+    {
+      "bbox": [
+        0.06,
+        0.35,
+        0.28,
+        0.32
+      ],
+      "type": "讲台"
+    },
+    {
+      "bbox": [
+        0.26,
+        0.29,
+        0.36,
+        0.14
+      ],
+      "type": "桌子"
+    },
+    {
+      "bbox": [
+        0.6,
+        0.27,
+        0.07,
+        0.13
+      ],
+      "type": "桌子"
+    },
+    {
+      "bbox": [
+        0.59,
+        0.27,
+        0.05,
+        0.11
+      ],
+      "type": "办公椅"
+    },
+    {
+      "bbox": [
+        0.33,
+        0.3,
+        0.08,
+        0.14
+      ],
+      "type": "办公椅"
+    },
+    {
+      "bbox": [
+        0.05,
+        0.46,
+        0.18,
+        0.35
+      ],
+      "type": "办公椅"
+    }
+  ],
+  "confidence": 0.95,
+  "scene": "FDFFM1",
+  "dataset": "Pre-VFall",
+  "fall_type": "dizziness_fall_forward",
+  "frame_source": "D:\\my_datasets\\Pre-VFall\\Pre-VFall\\Pre-VFall\\dizziness_fall_forward\\FDFFM1.mp4",
+  "model": "ep-20260713153135-wlsmb"
+}

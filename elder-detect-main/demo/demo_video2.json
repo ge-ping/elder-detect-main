@@ -1,0 +1,9 @@
+{
+  "video": "D:/my_datasets/CAUCAFall/Dataset CAUCAFall/Dataset CAUCAFall/CAUCAFall/Subject.1/Fall backwards/FallBackwardsS1.avi",
+  "T": 125,
+  "B": "synth_fall",
+  "E": 0.5,
+  "I_mean": 0.23651131987571716,
+  "alarm_on": 47,
+  "out": "demo/demo_video_risk.mp4"
+}

@@ -1,0 +1,92 @@
+{
+  "ground_top_y": 0.34,
+  "obstacles": [
+    {
+      "bbox": [
+        0.0,
+        0.51,
+        0.15,
+        0.92
+      ],
+      "type": "桌子"
+    },
+    {
+      "bbox": [
+        0.07,
+        0.36,
+        0.28,
+        0.67
+      ],
+      "type": "讲台"
+    },
+    {
+      "bbox": [
+        0.26,
+        0.29,
+        0.19,
+        0.44
+      ],
+      "type": "桌子"
+    },
+    {
+      "bbox": [
+        0.6,
+        0.28,
+        0.08,
+        0.15
+      ],
+      "type": "桌子"
+    },
+    {
+      "bbox": [
+        0.04,
+        0.36,
+        0.11,
+        0.49
+      ],
+      "type": "办公椅"
+    },
+    {
+      "bbox": [
+        0.06,
+        0.47,
+        0.18,
+        0.73
+      ],
+      "type": "办公椅"
+    },
+    {
+      "bbox": [
+        0.26,
+        0.29,
+        0.08,
+        0.39
+      ],
+      "type": "办公椅"
+    },
+    {
+      "bbox": [
+        0.33,
+        0.3,
+        0.09,
+        0.42
+      ],
+      "type": "办公椅"
+    },
+    {
+      "bbox": [
+        0.6,
+        0.27,
+        0.05,
+        0.14
+      ],
+      "type": "办公椅"
+    }
+  ],
+  "confidence": 0.96,
+  "scene": "FWFFM1",
+  "dataset": "Pre-VFall",
+  "fall_type": "weakness_fall_forward",
+  "frame_source": "D:\\my_datasets\\Pre-VFall\\Pre-VFall\\Pre-VFall\\weakness_fall_forward\\FWFFM1.mp4",
+  "model": "ep-20260713153135-wlsmb"
+}

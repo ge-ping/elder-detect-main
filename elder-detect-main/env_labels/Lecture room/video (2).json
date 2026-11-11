@@ -1,0 +1,15 @@
+{
+  "room_type": "living_room",
+  "lighting": "bright",
+  "floor_hazard": "obstacle",
+  "fall_risk": 0.35,
+  "fall_risk_std": 0.0707,
+  "confidence": 0.9,
+  "need_review": false,
+  "ds": "Lecture room",
+  "stem": "video (2)",
+  "n_frames_labeled": 3,
+  "prompt_ver": "v1",
+  "provider": "ark",
+  "model": "ep-20260713153135-wlsmb"
+}

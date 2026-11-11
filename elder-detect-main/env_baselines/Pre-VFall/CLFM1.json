@@ -1,0 +1,92 @@
+{
+  "ground_top_y": 0.35,
+  "obstacles": [
+    {
+      "bbox": [
+        0.0,
+        0.52,
+        0.12,
+        0.95
+      ],
+      "type": "桌子"
+    },
+    {
+      "bbox": [
+        0.04,
+        0.36,
+        0.26,
+        0.68
+      ],
+      "type": "讲台"
+    },
+    {
+      "bbox": [
+        0.25,
+        0.3,
+        0.14,
+        0.16
+      ],
+      "type": "桌子"
+    },
+    {
+      "bbox": [
+        0.31,
+        0.315,
+        0.07,
+        0.13
+      ],
+      "type": "办公椅"
+    },
+    {
+      "bbox": [
+        0.22,
+        0.3,
+        0.1,
+        0.17
+      ],
+      "type": "办公椅"
+    },
+    {
+      "bbox": [
+        0.59,
+        0.285,
+        0.07,
+        0.17
+      ],
+      "type": "桌子"
+    },
+    {
+      "bbox": [
+        0.583,
+        0.282,
+        0.05,
+        0.13
+      ],
+      "type": "办公椅"
+    },
+    {
+      "bbox": [
+        0.07,
+        0.47,
+        0.16,
+        0.72
+      ],
+      "type": "办公椅"
+    },
+    {
+      "bbox": [
+        0.01,
+        0.37,
+        0.1,
+        0.54
+      ],
+      "type": "办公椅"
+    }
+  ],
+  "confidence": 0.95,
+  "scene": "CLFM1",
+  "dataset": "Pre-VFall",
+  "fall_type": "confusion_delirium",
+  "frame_source": "D:\\my_datasets\\Pre-VFall\\Pre-VFall\\Pre-VFall\\confusion_delirium\\CLFM1.mp4",
+  "model": "ep-20260713153135-wlsmb"
+}

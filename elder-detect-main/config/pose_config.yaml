@@ -1,0 +1,41 @@
+# ============================================================
+# MediaPipe Pose 姿态提取配置
+# ============================================================
+# 对齐论文1/4/5 的需求，支持多模型、多关键点集切换。
+#
+# 关键词：
+#   - 论文1: 双目3D，output_world_landmarks=true
+#   - 论文4: 3关键点轻量化，selected_joints: "minimal_3"
+#   - 论文5: 13核心关节三分类，selected_joints: "core_13"
+# ============================================================
+
+pose:
+  # ---- 模型选择 ----
+  # 对应 model/{model_name}/pose_landmarker_{model_version}.task
+  model_name: "mediapipe_pose"              # 模型目录名
+  model_version: "lite"                     # lite | full | heavy
+  #
+  # 版本对比:
+  #   lite   — 轻量，CPU 实时 ~15ms/帧，适合边缘设备（论文4/8推荐）
+  #   full   — 精度提升，GPU ~8ms/帧，适合服务器端
+  #   heavy  — 最高精度，适合离线批处理
+
+  # ---- 检测置信度阈值 ----
+  min_detection_confidence: 0.5             # 人体检测阈值
+  min_tracking_confidence: 0.5             # 关键点跟踪阈值
+  min_pose_presence_confidence: 0.6        # 姿态存在阈值（论文1：低于60%丢弃帧）
+
+  # ---- 输出配置 ----
+  output_world_landmarks: true             # 3D 世界坐标（论文1需要3D重心计算）
+
+  # ---- 关键点筛选 ----
+  # null / "all_33"    → 全部33点
+  # "core_13"           → 论文5方案：13个核心躯干+四肢关节
+  # "minimal_3"         → 论文4方案：仅鼻+左肩+左髋
+  selected_joints: null
+
+  # ---- 性能参数 ----
+  frame_skip: 1                            # 跳帧间隔（1=不跳帧，3=每3帧处理1帧）
+  resize_width: null                       # 可选：统一缩放宽度（null=保持原始尺寸）
+  resize_height: null                      # 可选：统一缩放高度
+  use_gpu: false                            # true=GPU加速, false=CPU(XNNPACK)

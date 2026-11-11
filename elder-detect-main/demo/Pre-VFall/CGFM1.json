@@ -1,0 +1,11 @@
+{
+  "video": "D:\\my_datasets\\Pre-VFall\\Pre-VFall\\Pre-VFall\\confusion_nph\\CGFM1.mp4",
+  "T": 100,
+  "B": "synth_fall",
+  "E": 0.5,
+  "I_mean": 0.0,
+  "alarm_off": 38,
+  "alarm_on": 37,
+  "delta": -1,
+  "out": "D:\\myproject\\elder_decete\\demo\\Pre-VFall\\CGFM1.mp4"
+}

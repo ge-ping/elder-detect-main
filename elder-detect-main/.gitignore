@@ -1,0 +1,75 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+*.egg
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Model files: 源码与配置入库；权重(.pt)与二进制(.npy/.npz/.task/.tflite)忽略
+# 例外：4 个 demo 必需 run 的权重仍用 git add -f 强制入库（见仓库约定）
+model/**
+!model/**/
+!model/**/*.py
+!model/**/*.md
+!model/**/evolution.md
+model/**/*.pt
+model/**/*.npy
+model/**/*.npz
+model/**/*.task
+model/**/*.tflite
+# 4 个 demo 必需 run（含其 .pt 权重）强制入库例外（此条须在 .pt 忽略之后）
+!model/stgcn/stgcn_v1/run_03/**
+!model/stgcn/stgcn_v1/run_05/**
+!model/lstm/risk_v1/run_04/**
+!model/lstm/risk_v1/run_05/**
+
+# YOLO 检测器权重（~50MB，ultralytics 可重下，不入库）
+yolov8m-pose.pt
+yolov8n-pose.pt
+
+# Datasets (全部不上传)
+datasets/
+
+# Temp
+temp/
+
+pose_cache_yolo/
+
+# Test
+test/
+
+# Demo：源码入库，推理产物/视频排除
+demo/runs/
+*.mp4
+
+# Docs：设计文档作为项目资产入库
+
+# Secrets (API keys — never commit)
+.env
+# 模板可提交（不含真实密钥，作为团队配置清单）
+!.env.example
+
+
+
+
+/pose_cache
+# Jupyter
+.ipynb_checkpoints/
+
+# Local agent / tool config (never upload)
+.claude/
+.workbuddy/
+
+# 抽帧调试产物（可重建）
+frames/

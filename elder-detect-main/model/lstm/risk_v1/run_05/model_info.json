@@ -1,0 +1,19 @@
+{
+  "task": "regression",
+  "input_dim": 29,
+  "window_size": 60,
+  "risk_mode": "exponential",
+  "ramp_lo": 0.3,
+  "ramp_hi": 0.7,
+  "tau_u": 12,
+  "tau_abn": 20,
+  "loss": "class_weighted",
+  "beta": 3,
+  "midband_center": 0.45,
+  "midband_width": 0.18,
+  "midband_peak": 6.0,
+  "w_normal": 1.0,
+  "w_unstable": 2.0,
+  "w_fall": 2.0,
+  "multitask": false
+}

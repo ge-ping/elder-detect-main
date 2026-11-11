@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="老年人个人步态画像、基线变化与未来跌倒风险演示">
+  <title>长者步态画像与未来跌倒预警</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='app.css') }}">
+</head>
+<body>
+  <a class="skip-link" href="#main-content">跳到主要内容</a>
+  <header class="topbar">
+    <div>
+      <p class="eyebrow">纵向个人基线 · 演示环境</p>
+      <h1>长者步态画像与未来跌倒预警</h1>
+      <p class="subtitle">以步态和姿态为主，心理因素仅作辅助判断；概率输出须经真实纵向标签校准。</p>
+    </div>
+    <div class="header-status" aria-label="画像状态">
+      <span class="badge badge-sample" id="mode-badge">示例数据</span>
+      <div class="progress-summary">
+        <span>个人基线</span>
+        <strong id="baseline-progress-text">14 / 14 有效日</strong>
+        <span class="progress-track" aria-hidden="true"><span id="baseline-progress-bar"></span></span>
+      </div>
+    </div>
+  </header>
+
+  <main id="main-content" class="page-shell">
+    <section class="workspace" aria-label="视频分析与个人画像">
+      <aside class="upload-panel" aria-labelledby="upload-title">
+        <div class="section-heading">
+          <p class="section-kicker">新增观测</p>
+          <h2 id="upload-title">上传步行视频</h2>
+          <p>建议固定机位、全身入镜，并包含至少 20 秒连续步行。</p>
+        </div>
+
+        <form id="upload-form" novalidate>
+          <label class="dropzone" id="dropzone" for="video-input">
+            <input id="video-input" name="video" type="file" accept="video/mp4,video/quicktime,video/x-msvideo,video/x-matroska,video/webm" required>
+            <span class="dropzone-title">选择或拖入视频</span>
+            <span class="dropzone-help">MP4、MOV、AVI、MKV、WebM · 最大 200MB</span>
+            <span class="selected-file" id="selected-file">尚未选择文件</span>
+          </label>
+          <video id="video-preview" class="video-preview" controls playsinline hidden aria-label="上传视频预览"></video>
+
+          <div class="form-grid">
+            <label>姓名<input name="person_name" id="person-name" value="李奶奶" autocomplete="off"></label>
+            <label>编号<input name="person_id" id="person-id" value="elder_001" autocomplete="off"></label>
+            <label>年龄<input name="age" id="person-age" type="number" min="1" max="120" value="76"></label>
+            <label>观测日期<input name="observed_at" id="observed-at" type="date"></label>
+          </div>
+          <button class="primary-button" id="analyze-button" type="submit">
+            <span class="button-label">分析并更新画像</span>
+          </button>
+          <p class="form-status" id="form-status" role="status" aria-live="polite">等待上传视频。</p>
+        </form>
+      </aside>
+
+      <section class="profile-panel" id="profile-panel" aria-labelledby="profile-title">
+        <div class="profile-header">
+          <div>
+            <p class="section-kicker">个人画像</p>
+            <h2 id="profile-title"><span id="profile-name">李奶奶</span> · <span id="profile-age">76岁</span></h2>
+            <p id="profile-context">居家独居，家属每日探访</p>
+          </div>
+          <span class="quality-pill" id="quality-pill">数据质量合格</span>
+        </div>
+
+        <dl class="metric-grid" aria-label="最新步态与姿态指标">
+          <div class="metric-block"><dt>步频</dt><dd><strong id="metric-cadence">--</strong><span>步/分</span></dd><small>连续行走节律</small></div>
+          <div class="metric-block"><dt>步时变异</dt><dd><strong id="metric-step-cv">--</strong><span>CV</span></dd><small>越高表示节律波动越大</small></div>
+          <div class="metric-block"><dt>躯干摆动</dt><dd><strong id="metric-sway">--</strong><span>° RMS</span></dd><small>姿态稳定性变化</small></div>
+          <div class="metric-block"><dt>eMOS 代理</dt><dd><strong id="metric-emos">--</strong><span>proxy</span></dd><small>单目稳定裕度代理量</small></div>
+          <div class="metric-block metric-emphasis"><dt>偏离指数</dt><dd><strong id="metric-deviation">--</strong><span>0–1</span></dd><small>多维稳健偏离，不是概率</small></div>
+        </dl>
+
+        <div class="supporting-profile">
+          <div>
+            <h3>心理辅助信息</h3>
+            <p id="psychological-label">跌倒担忧：轻度</p>
+            <small id="psychological-role">仅作辅助协变量，不参与未校准偏离指数加权</small>
+          </div>
+          <div>
+            <h3>基线方法</h3>
+            <p id="baseline-method">中位数 + MAD</p>
+            <small id="baseline-anchor">固定使用最早14个有效日</small>
+          </div>
+        </div>
+      </section>
+
+      <aside class="risk-panel" aria-labelledby="risk-title">
+        <p class="section-kicker">当前状态</p>
+        <h2 id="risk-title">偏离变化需关注</h2>
+        <div class="distance-readout">
+          <span>当前偏离距离</span>
+          <strong id="distance-value">--</strong>
+          <small>连续 3 个有效日 ≥ 3 时提示统计偏离</small>
+        </div>
+        <div class="probability-lock">
+          <h3>7天 / 30天概率</h3>
+          <p id="risk-message">等待真实纵向标签校准</p>
+          <div class="locked-values" aria-label="未校准概率">
+            <span>7天<strong>—</strong></span><span>30天<strong>—</strong></span>
+          </div>
+        </div>
+        <p class="clinical-note">本结果不是诊断，也不能替代临床筛查、照护判断或紧急处置。</p>
+      </aside>
+    </section>
+
+    <section class="trend-section" aria-labelledby="trend-title">
+      <div class="trend-header">
+        <div>
+          <p class="section-kicker">长期变化</p>
+          <h2 id="trend-title">个人基线与每日观测</h2>
+        </div>
+        <label class="metric-select">图表指标
+          <select id="metric-select">
+            <option value="cadence_spm">步频</option>
+            <option value="step_time_cv">步时变异</option>
+            <option value="trunk_sway_rms_deg">躯干摆动</option>
+            <option value="emos_proxy">eMOS 代理</option>
+          </select>
+        </label>
+      </div>
+      <div class="chart-layout">
+        <figure class="chart-figure">
+          <figcaption><strong>每日观测与14日基线范围</strong><span id="chart-caption">步频，单位：步/分</span></figcaption>
+          <div id="baseline-chart" class="chart" role="img" aria-label="每日步频与个人基线变化图"></div>
+        </figure>
+        <figure class="chart-figure chart-narrow">
+          <figcaption><strong>多维偏离距离</strong><span>虚线阈值为 3</span></figcaption>
+          <div id="deviation-chart" class="chart" role="img" aria-label="每日多维偏离距离图"></div>
+        </figure>
+      </div>
+      <details class="accessible-data">
+        <summary>查看图表数据表</summary>
+        <div class="table-scroll"><table><thead><tr><th>日期</th><th>观测值</th><th>基线范围</th><th>偏离距离</th></tr></thead><tbody id="chart-data-body"></tbody></table></div>
+      </details>
+    </section>
+
+    <section class="history-section" aria-labelledby="history-title">
+      <div>
+        <p class="section-kicker">最近观测</p>
+        <h2 id="history-title">质量记录与解释边界</h2>
+      </div>
+      <div class="history-layout">
+        <div class="table-scroll"><table><thead><tr><th>日期</th><th>步频</th><th>步时变异</th><th>躯干摆动</th><th>偏离距离</th><th>质量</th></tr></thead><tbody id="history-body"></tbody></table></div>
+        <div class="boundary-notes">
+          <h3>读数说明</h3>
+          <ul>
+            <li><strong>14日锚点：</strong>只取最早14个合格观测日，避免异常期覆盖个人正常状态。</li>
+            <li><strong>代理指标：</strong>gait_speed_proxy 与 eMOS_proxy 仅用于同一机位下的个人纵向比较。</li>
+            <li><strong>概率门控：</strong>没有独立验证的真实跌倒标签时，7天和30天概率保持为空。</li>
+            <li><strong>心理因素：</strong>只在有标签的校准模型中作为可选协变量。</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer><p>演示系统 · 个人基线用于趋势观察，不用于自动诊断</p></footer>
+  <script src="{{ url_for('static', filename='app.js') }}" defer></script>
+</body>
+</html>

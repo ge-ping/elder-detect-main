@@ -1,0 +1,62 @@
+{
+  "total_alarm_off": 0,
+  "total_alarm_on": 0,
+  "reduced": 0,
+  "per_video": [
+    {
+      "dataset": "CAUCAFall",
+      "stem": "Subject.10_Fall_backwards",
+      "T": 272,
+      "E": 0.0,
+      "I_mean": 0.0,
+      "alarm_off": 0,
+      "alarm_on": 0,
+      "delta": 0,
+      "I_source": "computed"
+    },
+    {
+      "dataset": "CAUCAFall",
+      "stem": "Subject.10_Fall_forward",
+      "T": 207,
+      "E": 0.0,
+      "I_mean": 0.0,
+      "alarm_off": 0,
+      "alarm_on": 0,
+      "delta": 0,
+      "I_source": "computed"
+    },
+    {
+      "dataset": "CAUCAFall",
+      "stem": "Subject.10_Fall_left",
+      "T": 201,
+      "E": 0.0,
+      "I_mean": 0.0,
+      "alarm_off": 0,
+      "alarm_on": 0,
+      "delta": 0,
+      "I_source": "computed"
+    },
+    {
+      "dataset": "CAUCAFall",
+      "stem": "Subject.10_Fall_right",
+      "T": 200,
+      "E": 0.0,
+      "I_mean": 0.0,
+      "alarm_off": 0,
+      "alarm_on": 0,
+      "delta": 0,
+      "I_source": "computed"
+    },
+    {
+      "dataset": "CAUCAFall",
+      "stem": "Subject.10_Fall_sitting",
+      "T": 252,
+      "E": 0.0,
+      "I_mean": 0.0,
+      "alarm_off": 0,
+      "alarm_on": 0,
+      "delta": 0,
+      "I_source": "computed"
+    }
+  ]
+}

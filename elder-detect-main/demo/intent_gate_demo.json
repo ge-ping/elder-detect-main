@@ -1,0 +1,13 @@
+{
+  "video": "CAUCAFall/Subject.10_Fall_backwards",
+  "T": 272,
+  "B_source": "model",
+  "E": 0.5,
+  "I_mean": 0.2928810119628906,
+  "I_pos_frames": 269,
+  "alarm_off": 204,
+  "alarm_on": 200,
+  "delta": -4,
+  "theta_alarm_off_mean": 0.54,
+  "theta_alarm_on_mean": 0.5824271609239718
+}

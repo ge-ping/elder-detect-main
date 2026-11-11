@@ -1,0 +1,45 @@
+{
+  "ground_top_y": 0.31,
+  "obstacles": [
+    {
+      "bbox": [
+        0.5,
+        0.18,
+        0.15,
+        0.22
+      ],
+      "type": "木质抽屉柜"
+    },
+    {
+      "bbox": [
+        0.16,
+        0.46,
+        0.19,
+        0.38
+      ],
+      "type": "书桌"
+    },
+    {
+      "bbox": [
+        0.1,
+        0.74,
+        0.19,
+        0.26
+      ],
+      "type": "边桌"
+    },
+    {
+      "bbox": [
+        0.61,
+        0.62,
+        0.17,
+        0.37
+      ],
+      "type": "塑料椅子"
+    }
+  ],
+  "confidence": 0.96,
+  "scene": "Subject.1_Fall_backwards",
+  "frame_source": "D:\\my_datasets\\CAUCAFall\\Dataset CAUCAFall\\Dataset CAUCAFall\\CAUCAFall\\Subject.1\\Fall backwards\\cas100001.png",
+  "model": "ep-20260713153135-wlsmb"
+}

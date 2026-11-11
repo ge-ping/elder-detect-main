@@ -1,0 +1,83 @@
+{
+  "ground_top_y": 0.34,
+  "obstacles": [
+    {
+      "bbox": [
+        0.0,
+        0.52,
+        0.12,
+        0.45
+      ],
+      "type": "桌子"
+    },
+    {
+      "bbox": [
+        0.04,
+        0.37,
+        0.23,
+        0.3
+      ],
+      "type": "讲台"
+    },
+    {
+      "bbox": [
+        0.07,
+        0.47,
+        0.16,
+        0.7
+      ],
+      "type": "办公椅"
+    },
+    {
+      "bbox": [
+        0.25,
+        0.3,
+        0.14,
+        0.16
+      ],
+      "type": "会议桌"
+    },
+    {
+      "bbox": [
+        0.31,
+        0.32,
+        0.08,
+        0.15
+      ],
+      "type": "办公椅"
+    },
+    {
+      "bbox": [
+        0.23,
+        0.3,
+        0.09,
+        0.31
+      ],
+      "type": "办公椅"
+    },
+    {
+      "bbox": [
+        0.59,
+        0.28,
+        0.07,
+        0.14
+      ],
+      "type": "桌子"
+    },
+    {
+      "bbox": [
+        0.58,
+        0.28,
+        0.05,
+        0.13
+      ],
+      "type": "办公椅"
+    }
+  ],
+  "confidence": 0.96,
+  "scene": "CGFM1",
+  "dataset": "Pre-VFall",
+  "fall_type": "confusion_nph",
+  "frame_source": "D:\\my_datasets\\Pre-VFall\\Pre-VFall\\Pre-VFall\\confusion_nph\\CGFM1.mp4",
+  "model": "ep-20260713153135-wlsmb"
+}
