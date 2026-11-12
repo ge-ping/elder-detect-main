@@ -3,6 +3,8 @@ from pathlib import Path
 import tempfile
 import unittest
 
+import numpy as np
+
 
 class FakeAnalyzer:
     def __init__(self):
@@ -150,6 +152,19 @@ class WebDemoTest(unittest.TestCase):
         self.assertEqual(payload["profile"]["person"]["id"], "elder_009")
         self.assertIsNone(payload["profile"]["risk"]["risk_30d"])
         self.assertEqual(payload["observation"]["observed_at"], "2026-11-11")
+        profile = payload["profile"]
+        self.assertEqual(profile["baseline"]["valid_days"], 1)
+        self.assertEqual(profile["baseline"]["required_days"], 14)
+        self.assertAlmostEqual(profile["baseline"]["progress"], 1 / 14)
+        self.assertEqual(profile["baseline"]["anchor_label"], "待建立")
+        self.assertIsNone(profile["metrics"]["deviation_index"])
+        self.assertIsNone(profile["metrics"]["distance"])
+        self.assertEqual(profile["risk"]["status"], "collecting")
+        self.assertEqual(profile["risk"]["level"], "基线采集中")
+        self.assertEqual(len(profile["history"]), 1)
+        self.assertEqual(profile["history"][0]["date"], "2026-11-11")
+        self.assertNotIn("baseline_low", profile["history"][0])
+        self.assertNotIn("distance", profile["history"][0])
 
     def test_invalid_observed_at_is_rejected_before_analyzer_runs(self):
         from web_demo.app import create_app
@@ -171,6 +186,98 @@ class WebDemoTest(unittest.TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertIn("观测日期", response.get_json()["error"])
         self.assertEqual(analyzer.call_count, 0)
+
+    def test_empty_video_is_rejected_and_cleaned_before_analyzer_runs(self):
+        from web_demo.app import create_app
+
+        analyzer = FakeAnalyzer()
+        app = create_app({
+            "TESTING": True,
+            "UPLOAD_ROOT": self.temp_dir.name,
+        }, analyzer=analyzer)
+        response = app.test_client().post(
+            "/api/analyze",
+            data={"video": (io.BytesIO(b""), "empty.mp4")},
+            content_type="multipart/form-data",
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("空文件", response.get_json()["error"])
+        self.assertEqual(analyzer.call_count, 0)
+        self.assertEqual(list(Path(self.temp_dir.name).iterdir()), [])
+
+    def test_frontend_assets_define_collecting_empty_state_and_focus(self):
+        script_response = self.client.get("/static/app.js")
+        style_response = self.client.get("/static/app.css")
+        try:
+            script = script_response.get_data(as_text=True)
+            styles = style_response.get_data(as_text=True)
+        finally:
+            script_response.close()
+            style_response.close()
+
+        self.assertIn("renderCollectingCharts", script)
+        self.assertIn("需要至少14个真实有效观测日", script)
+        self.assertIn("getFullYear", script)
+        self.assertNotIn("toISOString().slice(0, 10)", script)
+        self.assertIn(".dropzone:focus-within", styles)
+
+
+class VideoAnalysisFrameLimitTest(unittest.TestCase):
+    def test_no_person_video_stops_at_source_frame_limit_and_releases_capture(self):
+        from web_demo.video_analysis import MediaPipeVideoAnalyzer
+
+        class EndlessCapture:
+            def __init__(self):
+                self.read_count = 0
+                self.released = False
+
+            def isOpened(self):
+                return True
+
+            def get(self, _property):
+                return 25.0
+
+            def read(self):
+                self.read_count += 1
+                return True, np.zeros((8, 8, 3), dtype=np.uint8)
+
+            def release(self):
+                self.released = True
+
+        class NoPersonExtractor:
+            def __init__(self):
+                self.detect_count = 0
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *_args):
+                return False
+
+            def detect_frame(self, _frame, _timestamp_ms):
+                self.detect_count += 1
+                return None
+
+        with tempfile.TemporaryDirectory() as directory:
+            model = Path(directory) / "pose.task"
+            model.write_bytes(b"test-model")
+            capture = EndlessCapture()
+            extractor = NoPersonExtractor()
+            analyzer = MediaPipeVideoAnalyzer(
+                model_path=model,
+                capture_factory=lambda _path: capture,
+                extractor_factory=lambda _config: extractor,
+                max_source_frames=5,
+                frame_stride=2,
+            )
+
+            with self.assertRaisesRegex(RuntimeError, "足够"):
+                analyzer.analyze(Path(directory) / "walk.mp4")
+
+        self.assertEqual(capture.read_count, 5)
+        self.assertEqual(extractor.detect_count, 3)
+        self.assertTrue(capture.released)
 
 
 if __name__ == "__main__":

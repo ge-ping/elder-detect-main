@@ -102,10 +102,14 @@ def create_app(
             temp_path = Path(temp_name)
             upload.save(temp_path)
             file_size = temp_path.stat().st_size
+            if file_size == 0:
+                return jsonify({"error": "上传的视频是空文件，请重新选择"}), 400
             try:
                 result = video_analyzer.analyze(temp_path)
                 mode = result.get("mode", "real_observation")
-                profile_payload = profile_with_real_observation(result, person)
+                profile_payload = profile_with_real_observation(
+                    result, person, observed_at
+                )
                 warning = None
                 message = "视频姿态摘要已完成；长期基线仍需持续采集"
             except ModelUnavailableError:

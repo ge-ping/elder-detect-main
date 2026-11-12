@@ -93,23 +93,56 @@ def build_sample_profile(person: dict[str, Any] | None = None) -> dict[str, Any]
 
 
 def profile_with_real_observation(
-    result: dict[str, Any], person: dict[str, Any]
+    result: dict[str, Any], person: dict[str, Any], observed_at: str
 ) -> dict[str, Any]:
-    """把一次真实视频摘要放入画像；长期概率仍保持为空。"""
+    """建立仅含本次真实观测的画像，不继承任何示例长期统计。"""
     profile = deepcopy(build_sample_profile(person))
     profile["data_mode"] = "real_observation"
-    profile["mode_label"] = "本次视频真实姿态摘要 + 示例历史基线"
-    features = result.get("features", {})
-    for key, value in features.items():
-        if isinstance(value, (int, float)) and not isinstance(value, bool):
-            profile["metrics"][key] = value
+    profile["mode_label"] = "本次视频真实姿态摘要"
+    profile["person"]["living_context"] = "本次未采集生活环境信息"
+    profile["person"]["psychological"] = {
+        "label": "本次未采集心理辅助信息",
+        "role": "心理因素仅可作为后续校准模型的辅助协变量",
+    }
+    features = {
+        key: value
+        for key, value in result.get("features", {}).items()
+        if isinstance(value, (int, float)) and not isinstance(value, bool)
+    }
+    profile["metrics"] = {
+        **features,
+        "deviation_index": None,
+        "distance": None,
+    }
     quality = result.get("quality", {})
-    profile["quality"].update(quality)
-    profile["risk"]["message"] = (
-        "本次视频已生成真实姿态摘要；历史基线仍为示例，"
-        "等待14个真实有效日及真实纵向标签校准"
-    )
-    profile["disclaimer"] = (
-        "本次指标来自上传视频；图表中的历史基线仍为示例数据，不能据此作临床判断。"
-    )
+    profile["quality"] = {
+        "status": "本次摘要已生成",
+        **quality,
+        "note": "仍需累计14个质量合格的真实观测日建立个人基线",
+    }
+    profile["baseline"] = {
+        "valid_days": 1,
+        "required_days": 14,
+        "progress": 1 / 14,
+        "anchor_start": None,
+        "anchor_end": None,
+        "anchor_label": "待建立",
+        "updated_at": observed_at,
+        "method": "待累计14个真实有效观测日后使用中位数 + MAD",
+        "slow_reference": "基线建立后才启用慢速参考线",
+    }
+    profile["risk"] = {
+        "status": "collecting",
+        "level": "基线采集中",
+        "risk_7d": None,
+        "risk_30d": None,
+        "message": "当前为第1个真实有效日，尚不能计算个人偏离或未来跌倒概率",
+        "persistent_deviation_days": 0,
+    }
+    profile["history"] = [{
+        "date": observed_at,
+        **features,
+        "quality": "本次视频",
+    }]
+    profile["disclaimer"] = "本次指标来自上传视频；个人基线尚未建立，不能据此作临床判断。"
     return profile

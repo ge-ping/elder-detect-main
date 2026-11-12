@@ -10,7 +10,11 @@ const metricMeta = {
 };
 
 const byId = (id) => document.getElementById(id);
-const numberText = (value, digits = 2) => Number.isFinite(Number(value)) ? Number(value).toFixed(digits) : "—";
+const numberText = (value, digits = 2) => (
+  value !== null && value !== undefined && value !== "" && Number.isFinite(Number(value))
+    ? Number(value).toFixed(digits)
+    : "—"
+);
 
 function setText(id, value) {
   const element = byId(id);
@@ -79,8 +83,14 @@ function svgLineChart(containerId, history, key, isDistance = false) {
     ? `<line class="threshold" x1="${margin.left}" x2="${width - margin.right}" y1="${y(3)}" y2="${y(3)}"></line><text x="${width - margin.right - 4}" y="${y(3) - 6}" text-anchor="end">提示阈值 3</text>`
     : "";
   const grid = axisRows.map((value) => `<g><line class="grid" x1="${margin.left}" x2="${width - margin.right}" y1="${y(value)}" y2="${y(value)}"></line><text x="${margin.left - 8}" y="${y(value) + 3}" text-anchor="end">${numberText(value, meta.decimals)}</text></g>`).join("");
-  const labels = xTicks.map((index) => `<text x="${x(index)}" y="${height - 8}" text-anchor="middle">${history[index].date.slice(5)}</text>`).join("");
-  const circles = values.map((value, index) => `<circle class="point" cx="${x(index)}" cy="${y(value)}" r="3.2" tabindex="0" aria-label="${history[index].date}，${meta.label}${numberText(value, meta.decimals)}${meta.unit}"><title>${history[index].date} · ${meta.label} ${numberText(value, meta.decimals)} ${meta.unit}</title></circle>`).join("");
+  const labels = xTicks.map((index) => {
+    const dateLabel = escapeHtml(String(history[index].date ?? "").slice(5));
+    return `<text x="${x(index)}" y="${height - 8}" text-anchor="middle">${dateLabel}</text>`;
+  }).join("");
+  const circles = values.map((value, index) => {
+    const dateLabel = escapeHtml(history[index].date);
+    return `<circle class="point" cx="${x(index)}" cy="${y(value)}" r="3.2" tabindex="0" aria-label="${dateLabel}，${meta.label}${numberText(value, meta.decimals)}${meta.unit}"><title>${dateLabel} · ${meta.label} ${numberText(value, meta.decimals)} ${meta.unit}</title></circle>`;
+  }).join("");
   const lineClass = isDistance ? "distance-line" : "data-line";
 
   container.innerHTML = `<svg viewBox="0 0 ${width} ${height}" role="img" aria-labelledby="${containerId}-title ${containerId}-desc"><title id="${containerId}-title">${meta.label}时间趋势</title><desc id="${containerId}-desc">共${history.length}个观测日，可聚焦数据点读取具体数值。</desc>${grid}${band}${median}${threshold}<line class="axis" x1="${margin.left}" x2="${margin.left}" y1="${margin.top}" y2="${height - margin.bottom}"></line><line class="axis" x1="${margin.left}" x2="${width - margin.right}" y1="${height - margin.bottom}" y2="${height - margin.bottom}"></line><path class="${lineClass}" d="${path(values)}"></path>${circles}${labels}</svg>`;
@@ -89,6 +99,9 @@ function svgLineChart(containerId, history, key, isDistance = false) {
 function renderTables(profile) {
   const latest = [...profile.history].slice(-8).reverse();
   byId("history-body").innerHTML = latest.map((item) => `<tr><td>${escapeHtml(item.date)}</td><td>${numberText(item.cadence_spm, 1)}</td><td>${numberText(item.step_time_cv, 3)}</td><td>${numberText(item.trunk_sway_rms_deg, 2)}°</td><td>${numberText(item.distance, 2)}</td><td>${escapeHtml(item.quality)}</td></tr>`).join("");
+}
+
+function renderChartDataTable(profile) {
   const key = state.metric;
   const baselines = baselineForMetric(profile.history, key);
   const meta = metricMeta[key];
@@ -114,21 +127,43 @@ function renderProfile(profile) {
   setText("psychological-label", profile.person.psychological.label);
   setText("psychological-role", profile.person.psychological.role);
   setText("baseline-method", profile.baseline.method);
-  setText("baseline-anchor", `${profile.baseline.anchor_start} 至 ${profile.baseline.anchor_end}`);
+  const anchorLabel = profile.baseline.anchor_label
+    || `${profile.baseline.anchor_start} 至 ${profile.baseline.anchor_end}`;
+  setText("baseline-anchor", anchorLabel);
   setText("risk-title", profile.risk.level);
   setText("risk-message", profile.risk.message);
   renderCharts();
   renderTables(profile);
 }
 
+function renderCollectingCharts(profile) {
+  const remaining = Math.max(profile.baseline.required_days - profile.baseline.valid_days, 0);
+  const message = `需要至少14个真实有效观测日；当前还需 ${remaining} 日。`;
+  const emptyMarkup = `<div class="chart-empty" role="status"><p><strong>个人基线采集中</strong>${message}<br>建立基线后才显示范围与偏离距离。</p></div>`;
+  byId("baseline-chart").innerHTML = emptyMarkup;
+  byId("deviation-chart").innerHTML = emptyMarkup;
+  byId("chart-data-body").innerHTML = `<tr><td colspan="4">${message}</td></tr>`;
+}
+
 function renderCharts() {
   if (!state.profile) return;
+  if (state.profile.baseline.valid_days < state.profile.baseline.required_days) {
+    renderCollectingCharts(state.profile);
+    return;
+  }
   const meta = metricMeta[state.metric];
   setText("chart-caption", `${meta.label}，单位：${meta.unit}`);
   byId("baseline-chart").setAttribute("aria-label", `每日${meta.label}与个人基线变化图`);
   svgLineChart("baseline-chart", state.profile.history, state.metric, false);
   svgLineChart("deviation-chart", state.profile.history, "distance", true);
-  renderTables(state.profile);
+  renderChartDataTable(state.profile);
+}
+
+function localDateString(value = new Date()) {
+  const year = value.getFullYear();
+  const month = String(value.getMonth() + 1).padStart(2, "0");
+  const day = String(value.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
 }
 
 async function loadProfile() {
@@ -188,7 +223,7 @@ async function submitVideo(event) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  byId("observed-at").value = new Date().toISOString().slice(0, 10);
+  byId("observed-at").value = localDateString();
   byId("video-input").addEventListener("change", (event) => showSelectedVideo(event.target.files[0]));
   byId("upload-form").addEventListener("submit", submitVideo);
   byId("metric-select").addEventListener("change", (event) => {
