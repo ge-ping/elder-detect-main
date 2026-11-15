@@ -15,6 +15,7 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from longitudinal.pose_features import summarize_pose_sequence  # noqa: E402
 from longitudinal.schema import DailyObservation  # noqa: E402
+from longitudinal.uncertainty import pose_session_precision  # noqa: E402
 from longitudinal.storage import ProfileStore  # noqa: E402
 
 
@@ -27,6 +28,10 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--source", default=None, help="数据来源说明，默认使用输入文件名")
     parser.add_argument("--replace", action="store_true", help="显式替换同一天已有观测")
     parser.add_argument("--min-confidence", type=float, default=0.5, help="姿态置信度下限")
+    parser.add_argument(
+        "--with-uncertainty", action="store_true",
+        help="从步事件与帧序列估计会话测量标准误并写入 feature_se",
+    )
     return parser
 
 
@@ -39,7 +44,7 @@ def _load_json(path: Path) -> dict:
     return payload
 
 
-def _load_npz(path: Path, min_confidence: float) -> dict:
+def _load_npz(path: Path, min_confidence: float, with_uncertainty: bool = False) -> dict:
     with np.load(path, allow_pickle=False) as data:
         required_fields = ("landmarks", "timestamps", "visibility")
         missing_fields = [name for name in required_fields if name not in data]
@@ -53,12 +58,19 @@ def _load_npz(path: Path, min_confidence: float) -> dict:
         if len(timestamps) > 1 and float(np.median(np.diff(timestamps))) > 2.0:
             timestamps = timestamps / 1000.0
         confidence = np.asarray(data["visibility"], dtype=np.float64)
-    return summarize_pose_sequence(
+    payload = summarize_pose_sequence(
         landmarks,
         timestamps,
         confidence,
         min_confidence=min_confidence,
     ).to_dict()
+    if with_uncertainty:
+        precision = pose_session_precision(
+            landmarks, timestamps, confidence, min_confidence=min_confidence,
+        )
+        payload["feature_se"] = precision.feature_se
+        payload["precision"] = precision.to_dict()
+    return payload
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -69,7 +81,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     if source_path.suffix.lower() == ".json":
         payload = _load_json(source_path)
     elif source_path.suffix.lower() == ".npz":
-        payload = _load_npz(source_path, args.min_confidence)
+        payload = _load_npz(
+            source_path, args.min_confidence, with_uncertainty=args.with_uncertainty,
+        )
     else:
         raise ValueError("输入格式只支持 .json 或 .npz")
 
@@ -79,6 +93,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         "features": payload["features"],
         "quality": payload["quality"],
         "psychological": payload.get("psychological", {}),
+        "feature_se": payload.get("feature_se", {}),
+        "precision": payload.get("precision", {}),
         "source": args.source or source_path.name,
     })
     store = ProfileStore(args.profile_dir, args.person_id)

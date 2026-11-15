@@ -1,6 +1,7 @@
 """Landmark Cox 模型产物校验与无额外依赖推理。"""
 from __future__ import annotations
 
+import copy
 from dataclasses import dataclass, field
 import json
 import math
@@ -22,6 +23,7 @@ class CoxModelArtifact:
     evidence_ids: tuple[str, ...]
     training_summary: dict[str, Any] = field(default_factory=dict)
     model_type: str = "landmark_cox"
+    input_contract: dict[str, Any] | None = None
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "CoxModelArtifact":
@@ -53,6 +55,9 @@ class CoxModelArtifact:
         calibrated = data.get("calibrated", False)
         if type(calibrated) is not bool:
             raise ValueError("calibrated 必须是 JSON boolean")
+        raw_contract = data.get("input_contract")
+        if raw_contract is not None and not isinstance(raw_contract, dict):
+            raise ValueError("input_contract 必须是对象或 null")
         return cls(
             schema_version=schema_version,
             bundle_id=bundle_id,
@@ -65,10 +70,13 @@ class CoxModelArtifact:
             trained_at=str(data.get("trained_at", "")),
             evidence_ids=tuple(str(value) for value in data.get("evidence_ids", ())),
             training_summary=dict(data.get("training_summary", {})),
+            input_contract=(
+                copy.deepcopy(raw_contract) if raw_contract is not None else None
+            ),
         )
 
     def to_dict(self) -> dict[str, Any]:
-        return {
+        payload: dict[str, Any] = {
             "schema_version": self.schema_version,
             "model_type": self.model_type,
             "bundle_id": self.bundle_id,
@@ -82,15 +90,15 @@ class CoxModelArtifact:
             "evidence_ids": list(self.evidence_ids),
             "training_summary": dict(self.training_summary),
         }
+        if self.input_contract is not None:
+            payload["input_contract"] = copy.deepcopy(self.input_contract)
+        return payload
 
 
-def predict_cumulative_risk(
+def _risk_from_artifact(
     features: dict[str, float],
     artifact: CoxModelArtifact,
 ) -> float:
-    """按 `1 - S0(h)^exp(beta*x)` 计算指定窗口累计风险。"""
-    if not artifact.calibrated:
-        raise ValueError("模型尚未校准，不能输出跌倒概率")
     missing = [name for name in artifact.feature_names if name not in features]
     if missing:
         raise ValueError(f"缺少模型特征：{', '.join(missing)}")
@@ -106,6 +114,28 @@ def predict_cumulative_risk(
     hazard_multiplier = math.exp(max(-50.0, min(50.0, linear_predictor)))
     survival = math.exp(math.log(artifact.baseline_survival) * hazard_multiplier)
     return max(0.0, min(1.0, 1.0 - survival))
+
+
+def predict_cumulative_risk(
+    features: dict[str, float],
+    artifact: CoxModelArtifact,
+) -> float:
+    """服务路径：只允许输出已校准模型的跌倒概率。"""
+    if not artifact.calibrated:
+        raise ValueError("模型尚未校准，不能输出跌倒概率")
+    return _risk_from_artifact(features, artifact)
+
+
+def predict_cumulative_risk_research(
+    features: dict[str, float],
+    artifact: CoxModelArtifact,
+) -> float:
+    """离线研究路径：允许未校准模型输出研究预测。
+
+    公式与 ``predict_cumulative_risk`` 相同，只是不要求 ``calibrated=True``；
+    服务概率的校准门槛不受影响。
+    """
+    return _risk_from_artifact(features, artifact)
 
 
 def _load_artifact(path: str | Path) -> CoxModelArtifact:
@@ -131,4 +161,13 @@ def load_model_bundle(
         raise ValueError("7天和30天模型的校准状态必须一致")
     if seven.evidence_ids != thirty.evidence_ids:
         raise ValueError("7天和30天模型的证据标识必须一致")
+    def semantic_contract(contract: dict[str, Any] | None):
+        if contract is None:
+            return None
+        return {
+            key: value for key, value in contract.items()
+            if key != "contract_id"
+        }
+    if semantic_contract(seven.input_contract) != semantic_contract(thirty.input_contract):
+        raise ValueError("7天和30天模型的输入契约必须语义一致")
     return bundle

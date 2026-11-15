@@ -8,6 +8,15 @@ from typing import Any
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 
+def _positive_mapping(name: str, values: dict[str, Any] | None) -> dict[str, float]:
+    """测量标准误必须是非负有限数值，且严格大于 0。"""
+    result = _finite_mapping(name, values)
+    for key, number in result.items():
+        if number <= 0:
+            raise ValueError(f"{name}.{key} 必须是正有限数值")
+    return result
+
+
 def _finite_mapping(name: str, values: dict[str, Any] | None) -> dict[str, float]:
     result: dict[str, float] = {}
     for key, value in (values or {}).items():
@@ -84,6 +93,8 @@ class DailyObservation:
     source: str = ""
     timezone: str = "Asia/Shanghai"
     local_date: str = ""
+    feature_se: dict[str, float] = field(default_factory=dict)
+    precision: dict[str, Any] = field(default_factory=dict)
 
     @property
     def observation_date(self) -> str:
@@ -111,15 +122,25 @@ class DailyObservation:
         else:
             local_time = parsed.astimezone(local_zone)
         observed_at = local_time.astimezone(utc_timezone.utc)
+        features = _finite_mapping("features", data.get("features"))
+        feature_se = _positive_mapping("feature_se", data.get("feature_se"))
+        unknown = [name for name in feature_se if name not in features]
+        if unknown:
+            raise ValueError(f"feature_se 中的特征不在 features 内：{unknown}")
+        precision = data.get("precision") or {}
+        if not isinstance(precision, dict):
+            raise ValueError("precision 必须是对象")
         return cls(
             person_id=person_id,
             observed_at=observed_at,
-            features=_finite_mapping("features", data.get("features")),
+            features=features,
             quality=QualityMetrics.from_dict(data.get("quality")),
             psychological=_finite_mapping("psychological", data.get("psychological")),
             source=str(data.get("source", "")),
             timezone=timezone_name,
             local_date=local_time.date().isoformat(),
+            feature_se=feature_se,
+            precision=dict(precision),
         )
 
     def to_dict(self) -> dict[str, Any]:
@@ -131,4 +152,6 @@ class DailyObservation:
             "psychological": dict(self.psychological),
             "source": self.source,
             "timezone": self.timezone,
+            "feature_se": dict(self.feature_se),
+            "precision": dict(self.precision),
         }

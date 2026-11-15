@@ -33,6 +33,7 @@ class ProfileStore:
         self.profile_dir = self.root / person_id
         self.observations_path = self.profile_dir / "observations.jsonl"
         self.baseline_path = self.profile_dir / "baseline.json"
+        self.ds_pcd_baseline_path = self.profile_dir / "ds_pcd_baseline.json"
         self.latest_risk_path = self.profile_dir / "latest_risk.json"
 
     def append_observation(
@@ -89,6 +90,14 @@ class ProfileStore:
         if not self.baseline_path.exists():
             return None
         return json.loads(self.baseline_path.read_text(encoding="utf-8"))
+
+    def save_ds_pcd_baseline(self, baseline: Any) -> None:
+        self._save_json(self.ds_pcd_baseline_path, _as_dict(baseline))
+
+    def load_ds_pcd_baseline(self) -> dict[str, Any] | None:
+        if not self.ds_pcd_baseline_path.exists():
+            return None
+        return json.loads(self.ds_pcd_baseline_path.read_text(encoding="utf-8"))
 
     def save_latest_result(self, result: Any) -> None:
         self._save_json(self.latest_risk_path, _as_dict(result))
