@@ -20,6 +20,27 @@ def config_fingerprint(config: LongitudinalConfig) -> str:
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
+def rms_distance_config_fingerprint(config: LongitudinalConfig) -> str:
+    """RMS 距离实际依赖的配置子集指纹。
+
+    ``persistent_distance_threshold``、``persistent_days`` 只影响持续偏离
+    天数，不参与 RMS 距离；``timezone`` 不参与距离计算。将这些字段排除，
+    避免仅因无关配置变化而拒绝 A 模型。
+    """
+    payload = {
+        "min_baseline_days": config.min_baseline_days,
+        "min_valid_frames": config.min_valid_frames,
+        "min_valid_steps": config.min_valid_steps,
+        "min_walking_duration_s": config.min_walking_duration_s,
+        "min_mean_confidence": config.min_mean_confidence,
+        "min_core_feature_coverage": config.min_core_feature_coverage,
+        "core_features": list(config.core_features),
+    }
+    return hashlib.sha256(
+        json.dumps(payload, ensure_ascii=False, sort_keys=True).encode("utf-8")
+    ).hexdigest()
+
+
 @dataclass(frozen=True)
 class BaselineFeatureStats:
     median: float

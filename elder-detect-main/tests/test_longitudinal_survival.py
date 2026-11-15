@@ -83,6 +83,20 @@ class CoxPredictionTest(unittest.TestCase):
             self.assertEqual(set(bundle), {7, 30})
             self.assertEqual(bundle[30].horizon_days, 30)
 
+    def test_model_bundle_allows_contract_ids_differing_by_horizon(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            seven = root / "risk_7d.json"
+            thirty = root / "risk_30d.json"
+            data7 = artifact_data(7)
+            data30 = artifact_data(30)
+            data7["input_contract"] = {"schema_version": 1, "contract_id": "same-contract-7d"}
+            data30["input_contract"] = {"schema_version": 1, "contract_id": "same-contract-30d"}
+            seven.write_text(json.dumps(data7), encoding="utf-8")
+            thirty.write_text(json.dumps(data30), encoding="utf-8")
+            bundle = load_model_bundle(seven, thirty)
+            self.assertEqual(set(bundle), {7, 30})
+
     def test_model_bundle_rejects_different_training_batches(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
